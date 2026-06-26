@@ -20,7 +20,7 @@ app.listen(PORT, () => {
 // Minecraft Settings
 // -----------------------------
 const config = {
-    host: "VoidedSMP.aternos.me",
+    host: "spinyfin.aternos.host",
     port: 38491,
     username: "JumpBot",
     version: false // Auto detect version
