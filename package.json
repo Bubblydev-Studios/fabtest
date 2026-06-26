@@ -1,6 +1,7 @@
 {
   "name": "minecraft-jump-bot",
   "version": "1.0.0",
+  "description": "Minecraft Jump Bot for Render",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
