@@ -1,5 +1,6 @@
-const mineflayer = require("mineflayer");
 const express = require("express");
+const mineflayer = require("mineflayer");
+const dns = require("dns");
 
 // -----------------------------
 // Render Web Server
@@ -7,46 +8,57 @@ const express = require("express");
 const app = express();
 
 app.get("/", (req, res) => {
-    res.send("Minecraft Bot is running!");
+    res.send("Minecraft Jump Bot is Online!");
 });
 
-const PORT = process.env.PORT || 3000;
+const WEB_PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Web server running on port ${PORT}`);
+app.listen(WEB_PORT, () => {
+    console.log(`Web server running on port ${WEB_PORT}`);
 });
 
 // -----------------------------
-// Minecraft Settings
+// Minecraft Config
 // -----------------------------
 const config = {
     host: "spinyfin.aternos.host",
     port: 38491,
     username: "JumpBot",
-    version: false // Auto detect version
+    version: false // Auto-detect
 };
 
+// -----------------------------
+// Start Bot
+// -----------------------------
 function startBot() {
-    console.log("==================================");
+
+    console.log("================================");
     console.log("Starting bot...");
     console.log(`Host: ${config.host}`);
     console.log(`Port: ${config.port}`);
-    console.log("==================================");
+    console.log("================================");
+
+    dns.lookup(config.host, (err, address, family) => {
+        if (err) {
+            console.log("DNS Error:", err);
+        } else {
+            console.log(`Resolved ${config.host} -> ${address} (IPv${family})`);
+        }
+    });
 
     const bot = mineflayer.createBot(config);
 
     bot._client.on("connect", () => {
-        console.log("✅ TCP Connected!");
+        console.log("✅ TCP Connected");
     });
 
     bot.on("login", () => {
-        console.log("✅ Logged into Minecraft!");
+        console.log("✅ Logged in");
     });
 
     bot.once("spawn", () => {
-        console.log("✅ Bot spawned!");
+        console.log("✅ Spawned!");
 
-        // Jump every 5 seconds
         setInterval(() => {
             if (!bot.entity) return;
 
@@ -56,22 +68,23 @@ function startBot() {
 
             setTimeout(() => {
                 bot.setControlState("jump", false);
-            }, 300);
+            }, 250);
 
         }, 5000);
     });
 
-    bot.on("chat", (username, message) => {
-        console.log(`<${username}> ${message}`);
-    });
-
-    bot.on("message", (message) => {
-        console.log("[SERVER]", message.toString());
+    bot.on("message", (msg) => {
+        console.log("[CHAT]", msg.toString());
     });
 
     bot.on("kicked", (reason) => {
         console.log("❌ Kicked:");
         console.log(reason);
+    });
+
+    bot.on("error", (err) => {
+        console.log("❌ Error:");
+        console.log(err);
     });
 
     bot.on("end", (reason) => {
@@ -80,14 +93,7 @@ function startBot() {
 
         console.log("Reconnecting in 5 seconds...");
 
-        setTimeout(() => {
-            startBot();
-        }, 5000);
-    });
-
-    bot.on("error", (err) => {
-        console.log("❌ Error:");
-        console.log(err);
+        setTimeout(startBot, 5000);
     });
 }
 
